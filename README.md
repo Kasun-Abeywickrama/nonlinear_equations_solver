@@ -1,4 +1,4 @@
-# Root Finder - Numerical Methods for Nonlinear Equations
+# Nonlinear Equations Solver
 
 A Django web application implementing numerical methods for solving nonlinear equations including:
 - Bisection Method
