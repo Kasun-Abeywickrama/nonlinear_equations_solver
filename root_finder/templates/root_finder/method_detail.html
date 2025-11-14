@@ -1,0 +1,447 @@
+{% extends 'root_finder/base.html' %}
+
+{% block title %}{{ method_name|title }} Method - Numerical Methods{% endblock %}
+
+{% block content %}
+<div id="error-container"></div>
+
+<!-- Method Header -->
+<div class="bg-white shadow rounded-lg mb-8 p-6">
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900" id="method-title">
+                {% if method_name == 'bisection' %}Bisection Method
+                {% elif method_name == 'newton' %}Newton-Raphson Method
+                {% elif method_name == 'secant' %}Secant Method
+                {% endif %}
+            </h1>
+            <p class="text-gray-600 mt-2">
+                {% if method_name == 'bisection' %}
+                    Guaranteed convergence using the Intermediate Value Theorem
+                {% elif method_name == 'newton' %}
+                    Fast quadratic convergence using derivatives
+                {% elif method_name == 'secant' %}
+                    Superlinear convergence without derivatives
+                {% endif %}
+            </p>
+        </div>
+        <div class="flex space-x-2">
+            <a href="{% url 'root_finder:theory' %}" 
+               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                📖 Theory
+            </a>
+            <a href="{% url 'root_finder:index' %}" 
+               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                ← Back to Home
+            </a>
+        </div>
+    </div>
+    
+    <!-- Method Info Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <div class="bg-blue-50 p-4 rounded-lg">
+            <h3 class="font-semibold text-blue-900 mb-2">Convergence Rate</h3>
+            <p class="text-sm text-blue-800">
+                {% if method_name == 'bisection' %}Linear (order 1)
+                {% elif method_name == 'newton' %}Quadratic (order 2)
+                {% elif method_name == 'secant' %}Superlinear (~1.618)
+                {% endif %}
+            </p>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg">
+            <h3 class="font-semibold text-green-900 mb-2">Requirements</h3>
+            <p class="text-sm text-green-800">
+                {% if method_name == 'bisection' %}Bracketing interval [a,b]
+                {% elif method_name == 'newton' %}Initial guess + derivative
+                {% elif method_name == 'secant' %}Two initial guesses
+                {% endif %}
+            </p>
+        </div>
+        <div class="bg-purple-50 p-4 rounded-lg">
+            <h3 class="font-semibold text-purple-900 mb-2">Best For</h3>
+            <p class="text-sm text-purple-800">
+                {% if method_name == 'bisection' %}Guaranteed convergence
+                {% elif method_name == 'newton' %}Fast, precise results
+                {% elif method_name == 'secant' %}Balance of speed & simplicity
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Method Form -->
+<div class="bg-white shadow rounded-lg p-6 mb-8">
+    <h2 class="text-2xl font-semibold text-gray-900 mb-6">Calculate Root</h2>
+    
+    <form id="method-form" onsubmit="calculateRoot(event)">
+        <!-- Function Input -->
+        <div class="mb-6">
+            <label for="function" class="block text-sm font-medium text-gray-700 mb-2">
+                Function f(x)
+            </label>
+            <input type="text" id="function" name="function" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                   placeholder="e.g., x**3 - 6*x**2 + 11*x - 6">
+            <p class="mt-1 text-sm text-gray-500">
+                Use Python syntax: x**2 for x², exp(x) for eˣ, cos(x), sin(x), etc.
+            </p>
+            
+            <!-- Test Function Selector -->
+            <div class="mt-3">
+                <p class="text-sm font-medium text-gray-700 mb-2">Or select a test function:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {% for key, func in test_functions.items %}
+                    <button type="button" onclick="loadTestFunction('{{ key }}')"
+                            class="text-left p-2 border border-gray-200 rounded text-sm hover:bg-gray-50 transition-colors">
+                        <div class="font-medium text-gray-900 truncate">{{ func.description|truncatechars:30 }}</div>
+                        <code class="text-xs text-gray-600">{{ func.expression|truncatechars:25 }}</code>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Method-specific parameters -->
+        {% if method_name == 'bisection' %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label for="a" class="block text-sm font-medium text-gray-700 mb-2">
+                    Left endpoint (a)
+                </label>
+                <input type="number" id="a" name="a" step="any" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <p class="mt-1 text-sm text-gray-500">Lower bound of the interval</p>
+            </div>
+            <div>
+                <label for="b" class="block text-sm font-medium text-gray-700 mb-2">
+                    Right endpoint (b)
+                </label>
+                <input type="number" id="b" name="b" step="any" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <p class="mt-1 text-sm text-gray-500">Upper bound of the interval</p>
+            </div>
+        </div>
+        {% elif method_name == 'newton' %}
+        <div class="mb-6">
+            <label for="x0" class="block text-sm font-medium text-gray-700 mb-2">
+                Initial guess (x₀)
+            </label>
+            <input type="number" id="x0" name="x0" step="any" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            <p class="mt-1 text-sm text-gray-500">Starting point for the algorithm</p>
+        </div>
+        {% elif method_name == 'secant' %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label for="x0" class="block text-sm font-medium text-gray-700 mb-2">
+                    First initial guess (x₀)
+                </label>
+                <input type="number" id="x0" name="x0" step="any" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            </div>
+            <div>
+                <label for="x1" class="block text-sm font-medium text-gray-700 mb-2">
+                    Second initial guess (x₁)
+                </label>
+                <input type="number" id="x1" name="x1" step="any" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Common parameters -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label for="tolerance" class="block text-sm font-medium text-gray-700 mb-2">
+                    Tolerance
+                </label>
+                <input type="text" id="tolerance" name="tolerance" value="1e-6"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <p class="mt-1 text-sm text-gray-500">Convergence tolerance (e.g., 1e-6)</p>
+            </div>
+            <div>
+                <label for="max_iterations" class="block text-sm font-medium text-gray-700 mb-2">
+                    Max Iterations
+                </label>
+                <input type="number" id="max_iterations" name="max_iterations" value="100" min="1"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" 
+                class="w-full md:w-auto inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+            <span id="calc-btn-text">Calculate Root</span>
+            <span id="calc-loading" class="loading ml-2">
+                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </span>
+        </button>
+    </form>
+</div>
+
+<!-- Results Section -->
+<div id="results-section" class="hidden">
+    <!-- Results Summary -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h3 class="text-2xl font-semibold text-gray-900 mb-4">Results</h3>
+        <div id="results-content"></div>
+    </div>
+
+    <!-- Function Plot -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Function Plot</h3>
+        <div id="function-plot" style="height: 400px;"></div>
+    </div>
+
+    <!-- Iteration Details -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Iteration Details</h3>
+        <div id="iteration-details"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const currentMethod = '{{ method_name }}';
+
+function calculateRoot(event) {
+    event.preventDefault();
+    
+    clearError();
+    showLoading('calc-loading');
+    document.getElementById('calc-btn-text').textContent = 'Calculating...';
+    
+    const formData = new FormData(document.getElementById('method-form'));
+    const data = {
+        method: currentMethod,
+        function: formData.get('function'),
+        tolerance: formData.get('tolerance'),
+        max_iterations: formData.get('max_iterations')
+    };
+    
+    // Add method-specific parameters
+    if (currentMethod === 'bisection') {
+        data.a = formData.get('a');
+        data.b = formData.get('b');
+    } else if (currentMethod === 'newton') {
+        data.x0 = formData.get('x0');
+    } else if (currentMethod === 'secant') {
+        data.x0 = formData.get('x0');
+        data.x1 = formData.get('x1');
+    }
+    
+    fetch('/api/calculate/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        hideLoading('calc-loading');
+        document.getElementById('calc-btn-text').textContent = 'Calculate Root';
+        
+        // Check if this is an error response (should have error as string and no root)
+        if (typeof result.error === 'string' && !result.hasOwnProperty('root')) {
+            showError(result.error);
+            if (result.partial_result) {
+                displayPartialResults(result.partial_result);
+            }
+        } else if (result.root !== undefined) {
+            displayResults(result);
+        } else {
+            showError('Unexpected response format');
+        }
+    })
+    .catch(error => {
+        hideLoading('calc-loading');
+        document.getElementById('calc-btn-text').textContent = 'Calculate Root';
+        showError('Network error: ' + error.message);
+    });
+}
+
+function displayResults(result) {
+    document.getElementById('results-section').classList.remove('hidden');
+    
+    // Results summary
+    const resultsHtml = `
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-blue-50 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-blue-600">${formatNumber(result.root, 8)}</div>
+                <div class="text-sm text-blue-800">Root Found</div>
+            </div>
+            <div class="bg-green-50 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-green-600">${result.iterations}</div>
+                <div class="text-sm text-green-800">Iterations</div>
+            </div>
+            <div class="bg-purple-50 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-purple-600">${formatNumber(result.error, 8)}</div>
+                <div class="text-sm text-purple-800">Final Error</div>
+            </div>
+            <div class="bg-orange-50 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-orange-600">${formatNumber(result.execution_time, 4)}</div>
+                <div class="text-sm text-orange-800">Time (seconds)</div>
+            </div>
+        </div>
+        
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-gray-900 mb-2">Summary</h4>
+            <p class="text-gray-700">
+                The ${result.method_name} method ${result.converged ? 'successfully converged' : 'failed to converge'} 
+                to a root at x = ${formatNumber(result.root, 8)} after ${result.iterations} iterations.
+                ${result.converged ? `The final error is ${formatNumber(result.error, 8)}.` : 'Consider adjusting parameters.'}
+            </p>
+        </div>
+    `;
+    
+    document.getElementById('results-content').innerHTML = resultsHtml;
+    
+    // Plot
+    if (result.plot && !window.plotlyUnavailable && typeof Plotly !== 'undefined') {
+        try {
+            const plotData = JSON.parse(result.plot);
+            Plotly.newPlot('function-plot', plotData.data, plotData.layout, {responsive: true});
+        } catch (e) {
+            document.getElementById('function-plot').innerHTML = `<p class="text-gray-500 text-center">Plot unavailable: ${e.message}</p>`;
+        }
+    } else {
+        document.getElementById('function-plot').innerHTML = '<p class="text-gray-500 text-center">Plot unavailable</p>';
+    }
+    
+    // Iteration details
+    displayIterationHistory(result.iteration_history);
+}
+
+function displayPartialResults(result) {
+    document.getElementById('results-section').classList.remove('hidden');
+    
+    const resultsHtml = `
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+            <h4 class="font-semibold text-yellow-800 mb-2">Partial Results (Method did not converge)</h4>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>Best estimate: ${formatNumber(result.root, 8)}</div>
+                <div>Iterations completed: ${result.iterations}</div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('results-content').innerHTML = resultsHtml;
+    displayIterationHistory(result.iteration_history);
+}
+
+function displayIterationHistory(history) {
+    if (!history || history.length === 0) {
+        document.getElementById('iteration-details').innerHTML = '<p class="text-gray-500">No iteration details available.</p>';
+        return;
+    }
+    
+    let html = `
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Iteration</th>
+    `;
+    
+    // Method-specific headers
+    if (currentMethod === 'bisection') {
+        html += `
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">a</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">b</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">c (midpoint)</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">f(c)</th>
+        `;
+    } else if (currentMethod === 'newton') {
+        html += `
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">x</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">f(x)</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">f'(x)</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">x_new</th>
+        `;
+    } else if (currentMethod === 'secant') {
+        html += `
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">x₀</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">x₁</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">f(x₀)</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">f(x₁)</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">x₂</th>
+        `;
+    }
+    
+    html += `
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Error</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+    `;
+    
+    history.slice(0, 20).forEach(step => {  // Show first 20 iterations
+        html += '<tr>';
+        html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${step.iteration}</td>`;
+        
+        if (currentMethod === 'bisection') {
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.a)}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.b)}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.c)}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step['f(c)'])}</td>`;
+        } else if (currentMethod === 'newton') {
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.x)}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step['f(x)'])}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step["f'(x)"])}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.x_new)}</td>`;
+        } else if (currentMethod === 'secant') {
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.x0)}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.x1)}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step['f(x0)'])}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step['f(x1)'])}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.x2)}</td>`;
+        }
+        
+        html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.error, 8)}</td>`;
+        html += '</tr>';
+    });
+    
+    html += '</tbody></table></div>';
+    
+    if (history.length > 20) {
+        html += `<p class="text-sm text-gray-500 mt-2">Showing first 20 of ${history.length} iterations</p>`;
+    }
+    
+    document.getElementById('iteration-details').innerHTML = html;
+}
+
+// Load test function
+function loadTestFunction(functionName) {
+    fetch(`/api/test-function/${functionName}/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('function').value = data.expression;
+            
+            // Set reasonable defaults based on function domain
+            if (data.domain && data.domain.length >= 2) {
+                const [min, max] = data.domain;
+                const mid = (min + max) / 2;
+                
+                if (currentMethod === 'bisection') {
+                    document.getElementById('a').value = min;
+                    document.getElementById('b').value = max;
+                } else if (currentMethod === 'newton') {
+                    document.getElementById('x0').value = mid;
+                } else if (currentMethod === 'secant') {
+                    document.getElementById('x0').value = min + (max - min) * 0.3;
+                    document.getElementById('x1').value = min + (max - min) * 0.7;
+                }
+            }
+        })
+        .catch(error => {
+            showError('Failed to load test function: ' + error.message);
+        });
+}
+</script>
+{% endblock %}

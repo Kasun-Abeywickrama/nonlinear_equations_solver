@@ -1,0 +1,321 @@
+{% extends 'root_finder/base.html' %}
+
+{% block title %}Theoretical Background - Numerical Methods{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow rounded-lg p-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Theoretical Background</h1>
+    
+    <div class="prose max-w-none">
+        <!-- Introduction -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4">Introduction</h2>
+            <p class="text-gray-700 mb-4">
+                Numerical methods for solving nonlinear equations are essential tools in computational mathematics and engineering. 
+                These methods provide iterative approaches to find roots (zeros) of functions where analytical solutions are 
+                difficult or impossible to obtain.
+            </p>
+            <p class="text-gray-700 mb-4">
+                A nonlinear equation has the form $f(x) = 0$, where $f$ is a nonlinear function. The goal is to find values 
+                of $x$ (called roots) that satisfy this equation. The three methods implemented here represent different 
+                approaches with varying convergence properties and computational requirements.
+            </p>
+        </section>
+
+        <!-- Bisection Method -->
+        <section class="mb-12 border-l-4 border-blue-500 pl-6">
+            <h2 class="text-2xl font-semibold text-blue-900 mb-4">1. Bisection Method</h2>
+            
+            <h3 class="text-xl font-medium text-gray-900 mb-3">Theory</h3>
+            <p class="text-gray-700 mb-4">
+                The bisection method is based on the <strong>Intermediate Value Theorem</strong>. If a continuous function $f(x)$ 
+                changes sign over an interval $[a,b]$, then there exists at least one root in that interval.
+            </p>
+            
+            <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                <h4 class="font-semibold mb-2">Algorithm Steps:</h4>
+                <ol class="list-decimal list-inside space-y-1 text-sm">
+                    <li>Verify that $f(a) \cdot f(b) < 0$ (root is bracketed)</li>
+                    <li>Calculate midpoint: $c = \frac{a + b}{2}$</li>
+                    <li>Evaluate $f(c)$</li>
+                    <li>If $f(a) \cdot f(c) < 0$, set $b = c$; otherwise set $a = c$</li>
+                    <li>Repeat until convergence</li>
+                </ol>
+            </div>
+
+            <h3 class="text-xl font-medium text-gray-900 mb-3">Convergence Analysis</h3>
+            <p class="text-gray-700 mb-2">
+                <strong>Convergence Rate:</strong> Linear (order 1)
+            </p>
+            <p class="text-gray-700 mb-2">
+                <strong>Error Bound:</strong> After $n$ iterations: $|e_n| \leq \frac{|b_0 - a_0|}{2^n}$
+            </p>
+            <p class="text-gray-700 mb-4">
+                The error decreases by a factor of 2 in each iteration, guaranteeing convergence but at a relatively slow rate.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-green-800 mb-2">Advantages</h4>
+                    <ul class="list-disc list-inside text-sm text-green-700 space-y-1">
+                        <li>Always converges if root is bracketed</li>
+                        <li>Simple to implement and understand</li>
+                        <li>Robust and reliable</li>
+                        <li>Does not require derivative</li>
+                    </ul>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-red-800 mb-2">Disadvantages</h4>
+                    <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+                        <li>Slow convergence (linear)</li>
+                        <li>Requires initial bracketing interval</li>
+                        <li>Cannot find complex roots</li>
+                        <li>May miss multiple roots in interval</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newton-Raphson Method -->
+        <section class="mb-12 border-l-4 border-green-500 pl-6">
+            <h2 class="text-2xl font-semibold text-green-900 mb-4">2. Newton-Raphson Method</h2>
+            
+            <h3 class="text-xl font-medium text-gray-900 mb-3">Theory</h3>
+            <p class="text-gray-700 mb-4">
+                The Newton-Raphson method uses linear approximation (tangent line) at each iteration to estimate the root location. 
+                The method is derived from Taylor series expansion of $f(x)$ around the current approximation.
+            </p>
+            
+            <div class="bg-green-50 p-4 rounded-lg mb-4">
+                <h4 class="font-semibold mb-2">Iteration Formula:</h4>
+                <p class="text-center text-lg">$$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$$</p>
+                <p class="text-sm mt-2">where $f'(x_n)$ is the derivative of $f$ evaluated at $x_n$</p>
+            </div>
+
+            <div class="bg-green-50 p-4 rounded-lg mb-4">
+                <h4 class="font-semibold mb-2">Geometric Interpretation:</h4>
+                <p class="text-sm">
+                    At each iteration, we find where the tangent line to $f(x)$ at point $(x_n, f(x_n))$ 
+                    intersects the x-axis. This intersection point becomes the next approximation $x_{n+1}$.
+                </p>
+            </div>
+
+            <h3 class="text-xl font-medium text-gray-900 mb-3">Convergence Analysis</h3>
+            <p class="text-gray-700 mb-2">
+                <strong>Convergence Rate:</strong> Quadratic (order 2) near simple roots
+            </p>
+            <p class="text-gray-700 mb-2">
+                <strong>Convergence Condition:</strong> $|f'(x)| > 0$ and $x_0$ sufficiently close to root
+            </p>
+            <p class="text-gray-700 mb-4">
+                <strong>Error Relation:</strong> $|e_{n+1}| \approx C|e_n|^2$ where $C = \frac{|f''(r)|}{2|f'(r)|}$
+            </p>
+
+            <div class="bg-yellow-50 p-4 rounded-lg mb-4">
+                <h4 class="font-semibold text-yellow-800 mb-2">Conditions for Convergence</h4>
+                <ul class="list-disc list-inside text-sm text-yellow-700 space-y-1">
+                    <li>$f'(x) \neq 0$ near the root (non-zero derivative)</li>
+                    <li>Initial guess $x_0$ must be sufficiently close to the root</li>
+                    <li>Function should be smooth (twice differentiable)</li>
+                </ul>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-green-800 mb-2">Advantages</h4>
+                    <ul class="list-disc list-inside text-sm text-green-700 space-y-1">
+                        <li>Quadratic convergence (very fast)</li>
+                        <li>Only needs one initial guess</li>
+                        <li>High accuracy with few iterations</li>
+                        <li>Well-established mathematical foundation</li>
+                    </ul>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-red-800 mb-2">Disadvantages</h4>
+                    <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+                        <li>Requires derivative calculation</li>
+                        <li>May diverge with poor initial guess</li>
+                        <li>Fails when $f'(x) = 0$</li>
+                        <li>Sensitive to multiple roots</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Secant Method -->
+        <section class="mb-12 border-l-4 border-purple-500 pl-6">
+            <h2 class="text-2xl font-semibold text-purple-900 mb-4">3. Secant Method</h2>
+            
+            <h3 class="text-xl font-medium text-gray-900 mb-3">Theory</h3>
+            <p class="text-gray-700 mb-4">
+                The secant method approximates the derivative in Newton's method using finite differences. 
+                Instead of using the analytical derivative, it uses a secant line through two previous points 
+                to estimate the slope.
+            </p>
+            
+            <div class="bg-purple-50 p-4 rounded-lg mb-4">
+                <h4 class="font-semibold mb-2">Iteration Formula:</h4>
+                <p class="text-center text-lg">$$x_{n+1} = x_n - f(x_n) \cdot \frac{x_n - x_{n-1}}{f(x_n) - f(x_{n-1})}$$</p>
+                <p class="text-sm mt-2">Requires two initial guesses: $x_0$ and $x_1$</p>
+            </div>
+
+            <div class="bg-purple-50 p-4 rounded-lg mb-4">
+                <h4 class="font-semibold mb-2">Derivative Approximation:</h4>
+                <p class="text-center">$$f'(x_n) \approx \frac{f(x_n) - f(x_{n-1})}{x_n - x_{n-1}}$$</p>
+            </div>
+
+            <h3 class="text-xl font-medium text-gray-900 mb-3">Convergence Analysis</h3>
+            <p class="text-gray-700 mb-2">
+                <strong>Convergence Rate:</strong> Superlinear (order ≈ 1.618, the golden ratio φ)
+            </p>
+            <p class="text-gray-700 mb-2">
+                <strong>Error Relation:</strong> $|e_{n+1}| \approx C|e_n|^{1.618}$
+            </p>
+            <p class="text-gray-700 mb-4">
+                Convergence is faster than bisection but slower than Newton-Raphson, making it a good compromise 
+                when derivatives are difficult to compute.
+            </p>
+
+            <h3 class="text-xl font-medium text-gray-900 mb-3">Comparison with Newton-Raphson</h3>
+            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                <ul class="list-disc list-inside text-sm space-y-2">
+                    <li><strong>Similarity:</strong> Both use linear approximation concepts</li>
+                    <li><strong>Key Difference:</strong> Secant uses numerical derivative approximation</li>
+                    <li><strong>Trade-off:</strong> Slower convergence but no derivative needed</li>
+                    <li><strong>Efficiency:</strong> Often more practical for complex functions</li>
+                </ul>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-green-800 mb-2">Advantages</h4>
+                    <ul class="list-disc list-inside text-sm text-green-700 space-y-1">
+                        <li>No derivative calculation required</li>
+                        <li>Superlinear convergence</li>
+                        <li>Good balance of speed and robustness</li>
+                        <li>Suitable for complex functions</li>
+                    </ul>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-red-800 mb-2">Disadvantages</h4>
+                    <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+                        <li>Requires two initial guesses</li>
+                        <li>May fail if $f(x_n) \approx f(x_{n-1})$</li>
+                        <li>Slower than Newton-Raphson</li>
+                        <li>Less predictable than bisection</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparison Summary -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4">Comparative Analysis</h2>
+            
+            <div class="overflow-x-auto mb-6">
+                <table class="min-w-full divide-y divide-gray-200 border">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aspect</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bisection</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Newton-Raphson</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Secant</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Convergence Rate</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Linear (1)</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Quadratic (2)</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Superlinear (~1.618)</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Initial Requirements</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bracketing interval</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">One guess + derivative</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Two guesses</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Reliability</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Always converges</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">May diverge</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Generally reliable</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Function Evaluations</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 per iteration</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2 per iteration (f + f')</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 per iteration</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Best Use Case</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">When reliability is critical</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">When speed is important</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Balance of speed & simplicity</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Practical Considerations -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4">Practical Considerations</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-blue-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-blue-900 mb-3">Choosing the Right Method</h3>
+                    <ul class="list-disc list-inside text-sm text-blue-800 space-y-2">
+                        <li><strong>Bisection:</strong> When you need guaranteed convergence and have a bracketing interval</li>
+                        <li><strong>Newton-Raphson:</strong> When derivative is available and high accuracy is needed quickly</li>
+                        <li><strong>Secant:</strong> When derivative is unknown/expensive and moderate speed is acceptable</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-yellow-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-yellow-900 mb-3">Common Pitfalls</h3>
+                    <ul class="list-disc list-inside text-sm text-yellow-800 space-y-2">
+                        <li>Poor initial guesses can cause divergence</li>
+                        <li>Functions with multiple roots require careful analysis</li>
+                        <li>Numerical precision limits affect convergence criteria</li>
+                        <li>Oscillatory or discontinuous functions may cause issues</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mathematical Foundations -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4">Mathematical Foundations</h2>
+            
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <h3 class="text-lg font-semibold mb-3">Key Theorems</h3>
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <strong>Intermediate Value Theorem:</strong> If $f$ is continuous on $[a,b]$ and $f(a) \cdot f(b) < 0$, 
+                        then there exists $c \in (a,b)$ such that $f(c) = 0$.
+                    </div>
+                    <div>
+                        <strong>Newton's Method Convergence:</strong> If $f$ is twice continuously differentiable and $f'(r) \neq 0$ 
+                        at root $r$, then Newton's method converges quadratically for sufficiently close initial guesses.
+                    </div>
+                    <div>
+                        <strong>Fixed Point Theorem:</strong> Root-finding can be reformulated as finding fixed points of 
+                        $g(x) = x - \frac{f(x)}{f'(x)}$ (Newton) or similar transformations.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- MathJax rendering -->
+<script>
+    // Ensure MathJax processes the page after loading
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    });
+</script>
+{% endblock %}

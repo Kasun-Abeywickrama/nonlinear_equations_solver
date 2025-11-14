@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Numerical Methods - Root Finder{% endblock %}</title>
+    
+    <!-- Fallback CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'root_finder/css/fallback.css' %}">
+    
+    <!-- Tailwind CSS - CDN for development only -->
+    <!-- For production, install as PostCSS plugin: https://tailwindcss.com/docs/installation -->
+    <script src="https://cdn.tailwindcss.com" onerror="console.warn('Tailwind CSS CDN failed to load. Using fallback styles.')"></script>
+    
+    <!-- Plotly.js - Using specific version with fallback -->
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js" onerror="handlePlotlyError()"></script>
+    <script>
+        function handlePlotlyError() {
+            console.warn('Plotly CDN failed to load. Trying alternative CDN...');
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/plotly.js@2.26.0/dist/plotly.min.js';
+            script.onerror = function() {
+                console.error('All Plotly CDNs failed. Plots will not be available.');
+                window.plotlyUnavailable = true;
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+    
+    <!-- MathJax for mathematical notation -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <!-- Custom CSS -->
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .method-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-card {
+            background: linear-gradient(145deg, #f8fafc, #ffffff);
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .loading.active {
+            display: inline-block;
+        }
+        
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="gradient-bg shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{% url 'root_finder:index' %}" class="text-white text-xl font-bold">
+                        📊 Numerical Methods
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'root_finder:index' %}" 
+                       class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
+                        Home
+                    </a>
+                    <a href="{% url 'root_finder:theory' %}" 
+                       class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
+                        Theory
+                    </a>
+                    <a href="{% url 'root_finder:history' %}" 
+                       class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
+                        History
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <p>&copy; 2024 Numerical Methods for Nonlinear Equations</p>
+                <p class="mt-2 text-gray-400">Implementing Bisection, Newton-Raphson, and Secant Methods</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global JavaScript -->
+    <script>
+        // CSRF token for Django
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        const csrftoken = getCookie('csrftoken');
+        
+        // Utility functions
+        function showLoading(elementId) {
+            document.getElementById(elementId).classList.add('active');
+        }
+        
+        function hideLoading(elementId) {
+            document.getElementById(elementId).classList.remove('active');
+        }
+        
+        function showError(message, containerId = 'error-container') {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = `
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                        <strong class="font-bold">Error:</strong>
+                        <span class="block sm:inline"> ${message}</span>
+                    </div>
+                `;
+            }
+        }
+        
+        function clearError(containerId = 'error-container') {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = '';
+            }
+        }
+        
+        // Format numbers for display
+        function formatNumber(num, decimals = 6) {
+            if (num === null || num === undefined || isNaN(num)) return 'N/A';
+            if (Math.abs(num) < 1e-10) return '0';
+            return parseFloat(num).toFixed(decimals);
+        }
+        
+        // Safe plot rendering
+        function safePlotlyRender(elementId, plotData, layout, config) {
+            const element = document.getElementById(elementId);
+            if (!element) {
+                console.warn(`Plot element ${elementId} not found`);
+                return;
+            }
+            
+            if (window.plotlyUnavailable || typeof Plotly === 'undefined') {
+                element.innerHTML = `
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                        <svg class="mx-auto h-12 w-12 text-yellow-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                        <h3 class="text-lg font-medium text-yellow-800">Plot Unavailable</h3>
+                        <p class="text-sm text-yellow-600 mt-1">Plotting library could not be loaded. Charts are temporarily unavailable.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                Plotly.newPlot(elementId, plotData, layout, config || {responsive: true});
+            } catch (error) {
+                console.error('Plot rendering error:', error);
+                element.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                        <h3 class="text-lg font-medium text-red-800">Plot Error</h3>
+                        <p class="text-sm text-red-600 mt-1">Unable to render plot: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Load test function
+        function loadTestFunction(functionName) {
+            fetch(`/api/test-function/${functionName}/`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('function').value = data.expression;
+                    // Set reasonable defaults based on function
+                    if (data.domain) {
+                        const [min, max] = data.domain;
+                        document.getElementById('a').value = min;
+                        document.getElementById('b').value = max;
+                        document.getElementById('x0').value = (min + max) / 2;
+                        document.getElementById('x1').value = max;
+                    }
+                })
+                .catch(error => showError('Failed to load test function'));
+        }
+    </script>
+    
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>

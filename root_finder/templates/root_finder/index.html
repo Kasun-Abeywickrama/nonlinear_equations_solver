@@ -1,0 +1,757 @@
+{% extends 'root_finder/base.html' %}
+
+{% block title %}Home - Numerical Methods{% endblock %}
+
+{% block content %}
+<div id="error-container"></div>
+
+<!-- Hero Section -->
+<div class="bg-white shadow rounded-lg mb-8">
+    <div class="px-6 py-8">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                Numerical Methods for Nonlinear Equations
+            </h1>
+            <p class="text-xl text-gray-600 mb-6">
+                Interactive implementation of root-finding algorithms with real-time visualization
+            </p>
+            <div class="flex justify-center space-x-4">
+                <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
+                    Bisection Method
+                </div>
+                <div class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
+                    Newton-Raphson Method
+                </div>
+                <div class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium">
+                    Secant Method
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Method Selection -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- Bisection Method -->
+    <div class="method-card card-hover p-6 rounded-lg cursor-pointer" onclick="showMethodForm('bisection')">
+        <div class="text-center">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Bisection Method</h3>
+            <p class="text-gray-600 text-sm mb-4">
+                Guaranteed convergence with bracketing interval. Linear convergence rate.
+            </p>
+            <div class="text-xs text-gray-500">
+                <span class="bg-blue-50 px-2 py-1 rounded">Robust</span>
+                <span class="bg-blue-50 px-2 py-1 rounded ml-1">Slow</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Newton-Raphson Method -->
+    <div class="method-card card-hover p-6 rounded-lg cursor-pointer" onclick="showMethodForm('newton')">
+        <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Newton-Raphson</h3>
+            <p class="text-gray-600 text-sm mb-4">
+                Quadratic convergence using derivative. Fast near simple roots.
+            </p>
+            <div class="text-xs text-gray-500">
+                <span class="bg-green-50 px-2 py-1 rounded">Fast</span>
+                <span class="bg-green-50 px-2 py-1 rounded ml-1">Needs f'(x)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secant Method -->
+    <div class="method-card card-hover p-6 rounded-lg cursor-pointer" onclick="showMethodForm('secant')">
+        <div class="text-center">
+            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Secant Method</h3>
+            <p class="text-gray-600 text-sm mb-4">
+                Superlinear convergence without derivatives. Good compromise.
+            </p>
+            <div class="text-xs text-gray-500">
+                <span class="bg-purple-50 px-2 py-1 rounded">No Derivative</span>
+                <span class="bg-purple-50 px-2 py-1 rounded ml-1">Moderate Speed</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Input Form -->
+<div id="method-form" class="bg-white shadow rounded-lg p-6 mb-8" style="display: none;">
+    <div class="flex justify-between items-center mb-6">
+        <h2 id="method-title" class="text-2xl font-bold text-gray-900"></h2>
+        <button onclick="hideMethodForm()" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
+
+    <form id="calculation-form" onsubmit="calculateRoot(event)">
+        <!-- Function Input -->
+        <div class="mb-6">
+            <label for="function" class="block text-sm font-medium text-gray-700 mb-2">
+                Function f(x)
+            </label>
+            <input type="text" id="function" name="function" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                   placeholder="e.g., x**3 - 6*x**2 + 11*x - 6"
+                   required>
+            <p class="mt-1 text-sm text-gray-500">
+                Use Python syntax: x**2 for x², exp(x) for eˣ, cos(x), sin(x), etc.
+            </p>
+        </div>
+
+        <!-- Test Functions -->
+        <div class="mb-6">
+            <p class="text-sm font-medium text-gray-700 mb-2">Or select a test function:</p>
+            <div class="flex flex-wrap gap-2">
+                {% for key, func in test_functions.items %}
+                <button type="button" onclick="loadTestFunction('{{ key }}')"
+                        class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors">
+                    {{ func.description|truncatechars:40 }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Method-specific Parameters -->
+        <div id="bisection-params" class="method-params" style="display: none;">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="a" class="block text-sm font-medium text-gray-700 mb-2">Left endpoint (a)</label>
+                    <input type="number" id="a" name="a" step="any"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="b" class="block text-sm font-medium text-gray-700 mb-2">Right endpoint (b)</label>
+                    <input type="number" id="b" name="b" step="any"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+            </div>
+        </div>
+
+        <div id="newton-params" class="method-params" style="display: none;">
+            <div>
+                <label for="x0" class="block text-sm font-medium text-gray-700 mb-2">Initial guess (x₀)</label>
+                <input type="number" id="x0" name="x0" step="any"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+        </div>
+
+        <div id="secant-params" class="method-params" style="display: none;">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="x0_secant" class="block text-sm font-medium text-gray-700 mb-2">First guess (x₀)</label>
+                    <input type="number" id="x0_secant" name="x0_secant" step="any"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="x1" class="block text-sm font-medium text-gray-700 mb-2">Second guess (x₁)</label>
+                    <input type="number" id="x1" name="x1" step="any"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Common Parameters -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="tolerance" class="block text-sm font-medium text-gray-700 mb-2">Tolerance</label>
+                <input type="number" id="tolerance" name="tolerance" step="any" value="1e-6"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <div>
+                <label for="max_iterations" class="block text-sm font-medium text-gray-700 mb-2">Max Iterations</label>
+                <input type="number" id="max_iterations" name="max_iterations" value="100"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="mt-8 flex space-x-4">
+            <button type="submit" 
+                    class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
+                <span class="loading" id="calc-loading">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </span>
+                Calculate Root
+            </button>
+            
+            <button type="button" onclick="showComparisonForm()" 
+                    class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+                Compare All Methods
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Results Section -->
+<div id="results-section" class="bg-white shadow rounded-lg p-6 mb-8" style="display: none;">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">Results</h3>
+    
+    <!-- Results Summary -->
+    <div id="results-summary" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <!-- Dynamic content -->
+    </div>
+    
+    <!-- Function Plot -->
+    <div id="function-plot" class="mb-6"></div>
+    
+    <!-- Iteration History -->
+    <div id="iteration-details" class="mt-6"></div>
+</div>
+
+<!-- Comparison Section -->
+<div id="comparison-section" class="bg-white shadow rounded-lg p-6 mb-8" style="display: none;">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">Method Comparison</h3>
+    
+    <!-- Comparison Form -->
+    <form id="comparison-form" onsubmit="compareAllMethods(event)" class="mb-6">
+        <div class="space-y-4">
+            <div>
+                <label for="comp-function" class="block text-sm font-medium text-gray-700 mb-2">Function f(x)</label>
+                <input type="text" id="comp-function" name="function" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                       required>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Bisection Parameters -->
+                <div class="p-4 border rounded-lg">
+                    <h4 class="font-medium text-gray-900 mb-2">Bisection Method</h4>
+                    <div class="space-y-2">
+                        <input type="number" id="comp-a" placeholder="Left endpoint (a)" step="any"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        <input type="number" id="comp-b" placeholder="Right endpoint (b)" step="any"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                </div>
+                
+                <!-- Newton Parameters -->
+                <div class="p-4 border rounded-lg">
+                    <h4 class="font-medium text-gray-900 mb-2">Newton-Raphson</h4>
+                    <input type="number" id="comp-x0" placeholder="Initial guess (x₀)" step="any"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                </div>
+                
+                <!-- Secant Parameters -->
+                <div class="p-4 border rounded-lg">
+                    <h4 class="font-medium text-gray-900 mb-2">Secant Method</h4>
+                    <div class="space-y-2">
+                        <input type="number" id="comp-secant-x0" placeholder="First guess (x₀)" step="any"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        <input type="number" id="comp-secant-x1" placeholder="Second guess (x₁)" step="any"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-4">
+                <button type="submit" 
+                        class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors">
+                    <span class="loading" id="comp-loading">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                    Compare Methods
+                </button>
+                
+                <button type="button" onclick="hideComparisonForm()" 
+                        class="bg-gray-300 text-gray-700 px-6 py-3 rounded-md hover:bg-gray-400 transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </form>
+    
+    <!-- Comparison Results -->
+    <div id="comparison-results"></div>
+</div>
+
+<!-- Recent Results -->
+{% if recent_results %}
+<div class="bg-white shadow rounded-lg p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-semibold text-gray-900">Recent Calculations</h3>
+        <div class="flex items-center space-x-3">
+            <a href="{% url 'root_finder:history' %}" 
+               class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                View All
+            </a>
+            <button id="clearHistoryBtn" onclick="showClearHistoryModal()"
+                    class="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H9a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Clear History
+            </button>
+        </div>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Function</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Root</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Iterations</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for result in recent_results %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {{ result.function_expression|truncatechars:30 }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ result.get_method_display }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {% if result.root %}{{ result.root|floatformat:6 }}{% else %}N/A{% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ result.iterations }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ result.execution_time|floatformat:4 }}s
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+<!-- Message container for notifications -->
+<div id="notification-container" class="fixed top-20 right-4 z-50"></div>
+
+{% block extra_js %}
+<script>
+let currentMethod = null;
+
+function showMethodForm(method) {
+    currentMethod = method;
+    
+    // Update title
+    const titles = {
+        'bisection': 'Bisection Method',
+        'newton': 'Newton-Raphson Method',
+        'secant': 'Secant Method'
+    };
+    document.getElementById('method-title').textContent = titles[method];
+    
+    // Hide all parameter sections
+    document.querySelectorAll('.method-params').forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    // Show specific parameter section
+    document.getElementById(method + '-params').style.display = 'block';
+    
+    // Show form
+    document.getElementById('method-form').style.display = 'block';
+    
+    // Scroll to form
+    document.getElementById('method-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+function hideMethodForm() {
+    document.getElementById('method-form').style.display = 'none';
+    currentMethod = null;
+}
+
+function showComparisonForm() {
+    // Copy function from single method form if available
+    const singleFunction = document.getElementById('function').value;
+    if (singleFunction) {
+        document.getElementById('comp-function').value = singleFunction;
+    }
+    
+    hideMethodForm();
+    document.getElementById('comparison-section').style.display = 'block';
+    document.getElementById('comparison-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function hideComparisonForm() {
+    document.getElementById('comparison-section').style.display = 'none';
+}
+
+function calculateRoot(event) {
+    event.preventDefault();
+    
+    if (!currentMethod) return;
+    
+    clearError();
+    showLoading('calc-loading');
+    
+    const formData = new FormData(document.getElementById('calculation-form'));
+    const data = {
+        method: currentMethod,
+        function: formData.get('function'),
+        tolerance: parseFloat(formData.get('tolerance')),
+        max_iterations: parseInt(formData.get('max_iterations'))
+    };
+    
+    // Add method-specific parameters
+    if (currentMethod === 'bisection') {
+        data.a = parseFloat(formData.get('a'));
+        data.b = parseFloat(formData.get('b'));
+    } else if (currentMethod === 'newton') {
+        data.x0 = parseFloat(formData.get('x0'));
+    } else if (currentMethod === 'secant') {
+        data.x0 = parseFloat(formData.get('x0_secant'));
+        data.x1 = parseFloat(formData.get('x1'));
+    }
+    
+    fetch('/api/calculate/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading('calc-loading');
+        
+        // Check if this is an error response (should have error as string and no root)
+        if (typeof data.error === 'string' && !data.hasOwnProperty('root')) {
+            showError(data.error);
+        } else if (data.root !== undefined) {
+            displayResults(data);
+        } else {
+            showError('Unexpected response format');
+        }
+    })
+    .catch(error => {
+        hideLoading('calc-loading');
+        showError('Calculation failed: ' + error.message);
+    });
+}
+
+function compareAllMethods(event) {
+    event.preventDefault();
+    
+    clearError();
+    showLoading('comp-loading');
+    
+    const data = {
+        function: document.getElementById('comp-function').value,
+        tolerance: 1e-6,
+        max_iterations: 100,
+        bisection: {
+            a: parseFloat(document.getElementById('comp-a').value),
+            b: parseFloat(document.getElementById('comp-b').value)
+        },
+        newton: {
+            x0: parseFloat(document.getElementById('comp-x0').value)
+        },
+        secant: {
+            x0: parseFloat(document.getElementById('comp-secant-x0').value),
+            x1: parseFloat(document.getElementById('comp-secant-x1').value)
+        }
+    };
+    
+    fetch('/api/compare/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading('comp-loading');
+        
+        if (data.error) {
+            showError(data.error);
+        } else {
+            displayComparisonResults(data);
+        }
+    })
+    .catch(error => {
+        hideLoading('comp-loading');
+        showError('Comparison failed: ' + error.message);
+    });
+}
+
+function displayResults(data) {
+    // Show results section
+    document.getElementById('results-section').style.display = 'block';
+    
+    // Results summary
+    const summaryHtml = `
+        <div class="result-card p-4 rounded-lg text-center">
+            <div class="text-2xl font-bold text-indigo-600">${formatNumber(data.root)}</div>
+            <div class="text-sm text-gray-500">Root</div>
+        </div>
+        <div class="result-card p-4 rounded-lg text-center">
+            <div class="text-2xl font-bold text-green-600">${data.iterations}</div>
+            <div class="text-sm text-gray-500">Iterations</div>
+        </div>
+        <div class="result-card p-4 rounded-lg text-center">
+            <div class="text-2xl font-bold text-orange-600">${formatNumber(data.error, 8)}</div>
+            <div class="text-sm text-gray-500">Final Error</div>
+        </div>
+        <div class="result-card p-4 rounded-lg text-center">
+            <div class="text-2xl font-bold text-purple-600">${formatNumber(data.execution_time, 4)}s</div>
+            <div class="text-sm text-gray-500">Time</div>
+        </div>
+    `;
+    document.getElementById('results-summary').innerHTML = summaryHtml;
+    
+    // Plot function if available
+    if (data.plot && !data.plot.error) {
+        Plotly.newPlot('function-plot', JSON.parse(data.plot).data, JSON.parse(data.plot).layout);
+    }
+    
+    // Display iteration history
+    displayIterationHistory(data.iteration_history, data.method_name);
+    
+    // Scroll to results
+    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function displayComparisonResults(data) {
+    let html = '<div class="space-y-6">';
+    
+    // Summary table
+    html += '<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50">';
+    html += '<tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>';
+    html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Root</th>';
+    html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Iterations</th>';
+    html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Error</th>';
+    html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time (s)</th>';
+    html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Converged</th></tr></thead>';
+    html += '<tbody class="bg-white divide-y divide-gray-200">';
+    
+    for (const [method, result] of Object.entries(data)) {
+        if (method.includes('plot')) continue;
+        
+        html += '<tr>';
+        html += `<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${method.charAt(0).toUpperCase() + method.slice(1)}</td>`;
+        html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatNumber(result.root)}</td>`;
+        html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${result.iterations}</td>`;
+        html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(result.error, 8)}</td>`;
+        html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(result.execution_time, 4)}</td>`;
+        html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">`;
+        html += `<span class="px-2 py-1 text-xs font-semibold rounded-full ${result.converged ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">`;
+        html += `${result.converged ? 'Yes' : 'No'}</span></td>`;
+        html += '</tr>';
+    }
+    
+    html += '</tbody></table></div>';
+    
+    // Add plots if available
+    if (data.comparison_plot) {
+        html += '<div id="comparison-plot-container"></div>';
+    }
+    
+    if (data.convergence_comparison) {
+        html += '<div id="convergence-plot-container"></div>';
+    }
+    
+    html += '</div>';
+    
+    document.getElementById('comparison-results').innerHTML = html;
+    
+    // Render plots
+    if (data.comparison_plot && !data.comparison_plot.error) {
+        setTimeout(() => {
+            Plotly.newPlot('comparison-plot-container', 
+                JSON.parse(data.comparison_plot).data, 
+                JSON.parse(data.comparison_plot).layout);
+        }, 100);
+    }
+    
+    if (data.convergence_comparison && !data.convergence_comparison.error) {
+        setTimeout(() => {
+            Plotly.newPlot('convergence-plot-container', 
+                JSON.parse(data.convergence_comparison).data, 
+                JSON.parse(data.convergence_comparison).layout);
+        }, 100);
+    }
+}
+
+function displayIterationHistory(history, methodName) {
+    if (!history || history.length === 0) {
+        document.getElementById('iteration-details').innerHTML = '<p class="text-gray-500">No iteration history available.</p>';
+        return;
+    }
+    
+    let html = '<h4 class="text-lg font-medium text-gray-900 mb-4">Iteration History</h4>';
+    html += '<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200">';
+    
+    // Table header based on method
+    html += '<thead class="bg-gray-50"><tr>';
+    html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Iteration</th>';
+    
+    if (methodName.includes('Bisection')) {
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">a</th>';
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">b</th>';
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">c</th>';
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">f(c)</th>';
+    } else if (methodName.includes('Newton')) {
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">x</th>';
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">f(x)</th>';
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">f\'(x)</th>';
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">x_new</th>';
+    } else if (methodName.includes('Secant')) {
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">x₀</th>';
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">x₁</th>';
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">f(x₀)</th>';
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">f(x₁)</th>';
+        html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">x₂</th>';
+    }
+    
+    html += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Error</th>';
+    html += '</tr></thead>';
+    
+    // Table body
+    html += '<tbody class="bg-white divide-y divide-gray-200">';
+    
+    history.slice(0, 10).forEach(step => {  // Show only first 10 iterations
+        html += '<tr>';
+        html += `<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${step.iteration || 'N/A'}</td>`;
+        
+        if (methodName.includes('Bisection')) {
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.a)}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.b)}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.c)}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step['f(c)'])}</td>`;
+        } else if (methodName.includes('Newton')) {
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.x)}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step['f(x)'])}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step["f'(x)"])}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.x_new)}</td>`;
+        } else if (methodName.includes('Secant')) {
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.x0)}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.x1)}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step['f(x0)'])}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step['f(x1)'])}</td>`;
+            html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.x2)}</td>`;
+        }
+        
+        html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(step.error, 8)}</td>`;
+        html += '</tr>';
+    });
+    
+    html += '</tbody></table></div>';
+    
+    if (history.length > 10) {
+        html += `<p class="text-sm text-gray-500 mt-2">Showing first 10 of ${history.length} iterations</p>`;
+    }
+    
+    document.getElementById('iteration-details').innerHTML = html;
+}
+
+// Clear history functionality
+function showClearHistoryModal() {
+    if (confirm('⚠️ Clear All Calculation History?\n\nThis will permanently delete:\n• All calculation results\n• All method comparisons\n• All iteration history\n\nThis action cannot be undone. Continue?')) {
+        clearAllHistory();
+    }
+}
+
+function clearAllHistory() {
+    // Show loading state
+    const button = document.getElementById('clearHistoryBtn');
+    const originalText = button.innerHTML;
+    
+    button.innerHTML = `
+        <svg class="animate-spin -ml-0.5 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Clearing...
+    `;
+    button.disabled = true;
+    
+    fetch('/api/clear-history/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`✅ ${data.message}`, 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showNotification(`❌ ${data.error || 'Failed to clear history'}`, 'error');
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    })
+    .catch(error => {
+        showNotification('❌ Network error occurred while clearing history', 'error');
+        button.innerHTML = originalText;
+        button.disabled = false;
+        console.error('Error:', error);
+    });
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-20 right-4 z-50 max-w-sm p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full ${
+        type === 'success' ? 'bg-green-100 border border-green-400 text-green-800' : 'bg-red-100 border border-red-400 text-red-800'
+    }`;
+    
+    notification.innerHTML = `
+        <div class="flex items-center justify-between">
+            <span class="font-medium">${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-lg font-bold opacity-70 hover:opacity-100">
+                ×
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Auto-remove after 5 seconds for success messages
+    if (type === 'success') {
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 5000);
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Numerical Methods - Offline Mode</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'root_finder/css/fallback.css' %}">
+    <style>
+        .offline-notice {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .content {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="offline-notice">
+        ⚠️ Limited Connectivity Mode - Some features may be unavailable
+    </div>
+    
+    <div class="content">
+        <div class="card p-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">Numerical Methods</h1>
+            <p class="text-lg text-gray-600 mb-6">
+                The application is running in limited mode due to connectivity issues.
+                Mathematical calculations are still available, but interactive plots may not work.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                <a href="{% url 'root_finder:method_detail' 'bisection' %}" class="btn btn-primary">
+                    Bisection Method
+                </a>
+                <a href="{% url 'root_finder:method_detail' 'newton' %}" class="btn btn-primary">
+                    Newton-Raphson Method
+                </a>
+                <a href="{% url 'root_finder:method_detail' 'secant' %}" class="btn btn-primary">
+                    Secant Method
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
