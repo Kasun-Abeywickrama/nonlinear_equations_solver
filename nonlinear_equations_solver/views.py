@@ -29,7 +29,7 @@ def index(request):
         'test_functions': test_functions,
         'recent_results': recent_results,
     }
-    return render(request, 'root_finder/index.html', context)
+    return render(request, 'nonlinear_equations_solver/index.html', context)
 
 
 def method_detail(request, method_name):
@@ -43,7 +43,7 @@ def method_detail(request, method_name):
         'method_name': method_name,
         'test_functions': test_functions,
     }
-    return render(request, 'root_finder/method_detail.html', context)
+    return render(request, 'nonlinear_equations_solver/method_detail.html', context)
 
 
 @csrf_exempt
@@ -457,12 +457,12 @@ def results_history(request):
         'results': results,
         'comparisons': comparisons,
     }
-    return render(request, 'root_finder/history.html', context)
+    return render(request, 'nonlinear_equations_solver/history.html', context)
 
 
 def theoretical_background(request):
     """Display theoretical background information"""
-    return render(request, 'root_finder/theory.html')
+    return render(request, 'nonlinear_equations_solver/theory.html')
 
 
 @require_http_methods(["GET"])

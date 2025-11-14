@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'root_finder',
+    'nonlinear_equations_solver',
 ]
 
 MIDDLEWARE = [

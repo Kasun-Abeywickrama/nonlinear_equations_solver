@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class RootFinderConfig(AppConfig):
+class NonlinearEquationsSolverConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'root_finder'
+    name = 'nonlinear_equations_solver'

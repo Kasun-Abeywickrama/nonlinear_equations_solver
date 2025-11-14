@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Numerical Methods - Offline Mode</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'root_finder/css/fallback.css' %}">
+    <link rel="stylesheet" href="{% static 'nonlinear_equations_solver/css/fallback.css' %}">
     <style>
         .offline-notice {
             background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
@@ -35,13 +35,13 @@
             </p>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-                <a href="{% url 'root_finder:method_detail' 'bisection' %}" class="btn btn-primary">
+                <a href="{% url 'nonlinear_equations_solver:method_detail' 'bisection' %}" class="btn btn-primary">
                     Bisection Method
                 </a>
-                <a href="{% url 'root_finder:method_detail' 'newton' %}" class="btn btn-primary">
+                <a href="{% url 'nonlinear_equations_solver:method_detail' 'newton' %}" class="btn btn-primary">
                     Newton-Raphson Method
                 </a>
-                <a href="{% url 'root_finder:method_detail' 'secant' %}" class="btn btn-primary">
+                <a href="{% url 'nonlinear_equations_solver:method_detail' 'secant' %}" class="btn btn-primary">
                     Secant Method
                 </a>
             </div>

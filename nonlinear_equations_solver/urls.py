@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-app_name = 'root_finder'
+app_name = 'nonlinear_equations_solver'
 
 urlpatterns = [
     path('', views.index, name='index'),
