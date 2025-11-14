@@ -131,8 +131,9 @@ Each method includes comprehensive implementation with:
 
 1. **Clone Repository**
    ```bash
-   git clone <repository-url>
-   cd root_finder
+   git clone https://github.com/Kasun-Abeywickrama/nonlinear_equations_solver.git
+   
+   cd nonlinear_equations_solver
    ```
 
 2. **Create Virtual Environment**
