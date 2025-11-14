@@ -1,0 +1,13 @@
+# Core Django framework
+Django>=4.2.7,<5.0
+
+# Scientific computing libraries  
+numpy>=1.21.0
+matplotlib>=3.5.0
+sympy>=1.10.0
+plotly>=5.0.0
+pandas>=1.5.0
+
+# Additional build dependencies (for troubleshooting)
+setuptools>=65.0.0
+wheel>=0.37.0

@@ -127,7 +127,22 @@ Each method includes comprehensive implementation with:
 - pip package manager
 - Git version control
 
-### Installation Steps
+### Quick Setup (Recommended)
+
+For automated setup, use the provided setup scripts:
+
+**Windows:**
+```cmd
+setup.bat
+```
+
+**Linux/macOS:**
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+### Manual Installation Steps
 
 1. **Clone Repository**
    ```bash
@@ -153,20 +168,24 @@ Each method includes comprehensive implementation with:
    source venv/bin/activate
    ```
 
-4. **Install Dependencies**
+4. **Update pip and Install Build Tools**
+   ```bash
+   # Update pip to latest version
+   python -m pip install --upgrade pip
+   
+   # Install essential build tools
+   pip install setuptools wheel
+   ```
+
+5. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-5. **Database Setup**
+6. **Database Setup**
    ```bash
    python manage.py makemigrations
    python manage.py migrate
-   ```
-
-6. **Create Admin User (Optional)**
-   ```bash
-   python manage.py createsuperuser
    ```
 
 7. **Start Development Server**
@@ -177,6 +196,31 @@ Each method includes comprehensive implementation with:
 8. **Access Application**
    - Main application: http://127.0.0.1:8000
    - Admin interface: http://127.0.0.1:8000/admin
+
+## Troubleshooting Installation Issues
+
+### Common Error: "Cannot import 'setuptools.build_meta'"
+If you encounter this error during `pip install -r requirements.txt`, follow these steps:
+
+```bash
+# Update pip and install build essentials
+python -m pip install --upgrade pip
+pip install setuptools wheel
+
+# Then retry installing dependencies
+pip install -r requirements.txt
+```
+
+### Alternative Installation (if issues persist):
+```bash
+# Install packages one by one
+pip install Django==4.2.7
+pip install numpy==1.24.3
+pip install sympy==1.12
+pip install plotly==5.17.0
+pip install matplotlib==3.7.2
+pip install pandas==2.0.3
+```
 
 ## Usage Examples
 
