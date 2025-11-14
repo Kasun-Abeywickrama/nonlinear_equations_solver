@@ -1,56 +1,57 @@
 @echo off
-echo Setting up Nonlinear Equations Solver...
+echo ====================================
+echo  Nonlinear Equations Solver Setup
+echo ====================================
 echo.
 
-echo Creating virtual environment...
+echo [1/6] Creating virtual environment...
 python -m venv venv
 if %errorlevel% neq 0 (
-    echo Error creating virtual environment. Make sure Python is installed.
+    echo ERROR: Failed to create virtual environment. Make sure Python is installed.
     pause
     exit /b 1
 )
 
-echo Activating virtual environment...
+echo [2/6] Activating virtual environment...
 call venv\Scripts\activate
 if %errorlevel% neq 0 (
-    echo Error activating virtual environment.
+    echo ERROR: Failed to activate virtual environment.
     pause
     exit /b 1
 )
 
-echo Updating pip and installing build tools...
+echo [3/6] Updating pip to latest version...
 python -m pip install --upgrade pip
+
+echo [4/6] Installing essential build tools...
 pip install setuptools wheel
 
-echo Installing dependencies...
+echo [5/6] Installing project dependencies...
 pip install -r requirements.txt
 if %errorlevel% neq 0 (
-    echo Error installing dependencies. Trying flexible versions...
-    if exist requirements-flexible.txt (
-        pip install -r requirements-flexible.txt
-    ) else (
-        echo Installing packages individually...
-        pip install "Django>=4.2.7,<5.0"
-        pip install "numpy>=1.26.0"
-        pip install "matplotlib>=3.7.0"
-        pip install "sympy>=1.12"
-        pip install "plotly>=5.17.0"
-        pip install "pandas>=2.1.0"
-    )
-    if %errorlevel% neq 0 (
-        echo Installation failed. Please check the README for manual installation steps.
-        pause
-        exit /b 1
-    )
+    echo ERROR: Failed to install dependencies.
+    echo Please check the README.md troubleshooting section.
+    pause
+    exit /b 1
 )
 
-echo Setting up database...
+echo [6/6] Setting up database...
 python manage.py makemigrations
 python manage.py migrate
+if %errorlevel% neq 0 (
+    echo ERROR: Failed to set up database.
+    pause
+    exit /b 1
+)
 
 echo.
-echo Setup complete! To start the server, run:
-echo   venv\Scripts\activate
-echo   python manage.py runserver
+echo ====================================
+echo       SETUP COMPLETE! ^_^
+echo ====================================
+echo.
+echo To start the development server:
+echo   1. venv\Scripts\activate
+echo   2. python manage.py runserver
+echo   3. Open http://127.0.0.1:8000
 echo.
 pause

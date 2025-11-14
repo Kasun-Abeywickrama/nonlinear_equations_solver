@@ -127,9 +127,7 @@ Each method includes comprehensive implementation with:
 - pip package manager
 - Git version control
 
-### Quick Setup (Recommended)
-
-For automated setup, use the provided setup scripts:
+### Quick Setup (Automated)
 
 **Windows:**
 ```cmd
@@ -163,9 +161,6 @@ chmod +x setup.sh
    
    # macOS/Linux
    source venv/bin/activate
-   
-   # macOS/Linux
-   source venv/bin/activate
    ```
 
 4. **Update pip and Install Build Tools**
@@ -178,9 +173,11 @@ chmod +x setup.sh
    ```
 
 5. **Install Dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
+   
 
 6. **Database Setup**
    ```bash
@@ -197,46 +194,21 @@ chmod +x setup.sh
    - Main application: http://127.0.0.1:8000
    - Admin interface: http://127.0.0.1:8000/admin
 
-## Troubleshooting Installation Issues
+## Troubleshooting
 
-### Common Error: "Cannot import 'setuptools.build_meta'" or NumPy Build Issues
+### If you get "Cannot import 'setuptools.build_meta'" error:
+1. Make sure you have the latest pip: `python -m pip install --upgrade pip`
+2. Install build tools: `pip install setuptools wheel`
+3. Use the individual package installation method above
 
-**For Python 3.13 users:** NumPy 1.24.3 is incompatible with Python 3.13. Use these steps:
-
-```bash
-# Update pip and install build essentials
-python -m pip install --upgrade pip
-pip install setuptools wheel
-
-# Install with compatible versions
-pip install -r requirements-flexible.txt
-```
-
-**For Python 3.8-3.12:** If you encounter build errors:
-
-```bash
-# Update pip and install build essentials
-python -m pip install --upgrade pip
-pip install setuptools wheel
-
-# Then retry installing dependencies
-pip install -r requirements.txt
-```
-
-### Alternative Installation (if issues persist):
-```bash
-# Install packages one by one with compatible versions
-pip install "Django>=4.2.7,<5.0"
-pip install "numpy>=1.26.0"
-pip install "matplotlib>=3.7.0" 
-pip install "sympy>=1.12"
-pip install "plotly>=5.17.0"
-pip install "pandas>=2.1.0"
-```
+### Package Version Notes for Python 3.13:
+- **NumPy**: Use `numpy>=1.26.0` (earlier versions don't support Python 3.13)
+- **Matplotlib**: Use `matplotlib>=3.8.0` (3.7.x requires C++ build tools)
+- **Other packages**: Use the versions specified in requirements.txt
 
 ### Python Version Compatibility:
-- **Recommended:** Python 3.8 - 3.12
-- **Python 3.13:** Supported with flexible requirements
+- **Supported:** Python 3.8 - 3.13
+- **Recommended:** Python 3.10 - 3.12
 - **Python 3.7 or lower:** Not supported
 
 ## Usage Examples
