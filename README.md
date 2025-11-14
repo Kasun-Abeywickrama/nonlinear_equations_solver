@@ -199,8 +199,20 @@ chmod +x setup.sh
 
 ## Troubleshooting Installation Issues
 
-### Common Error: "Cannot import 'setuptools.build_meta'"
-If you encounter this error during `pip install -r requirements.txt`, follow these steps:
+### Common Error: "Cannot import 'setuptools.build_meta'" or NumPy Build Issues
+
+**For Python 3.13 users:** NumPy 1.24.3 is incompatible with Python 3.13. Use these steps:
+
+```bash
+# Update pip and install build essentials
+python -m pip install --upgrade pip
+pip install setuptools wheel
+
+# Install with compatible versions
+pip install -r requirements-flexible.txt
+```
+
+**For Python 3.8-3.12:** If you encounter build errors:
 
 ```bash
 # Update pip and install build essentials
@@ -213,14 +225,19 @@ pip install -r requirements.txt
 
 ### Alternative Installation (if issues persist):
 ```bash
-# Install packages one by one
-pip install Django==4.2.7
-pip install numpy==1.24.3
-pip install sympy==1.12
-pip install plotly==5.17.0
-pip install matplotlib==3.7.2
-pip install pandas==2.0.3
+# Install packages one by one with compatible versions
+pip install "Django>=4.2.7,<5.0"
+pip install "numpy>=1.26.0"
+pip install "matplotlib>=3.7.0" 
+pip install "sympy>=1.12"
+pip install "plotly>=5.17.0"
+pip install "pandas>=2.1.0"
 ```
+
+### Python Version Compatibility:
+- **Recommended:** Python 3.8 - 3.12
+- **Python 3.13:** Supported with flexible requirements
+- **Python 3.7 or lower:** Not supported
 
 ## Usage Examples
 

@@ -26,7 +26,17 @@ echo Installing dependencies...
 pip install -r requirements.txt
 if %errorlevel% neq 0 (
     echo Error installing dependencies. Trying flexible versions...
-    pip install -r requirements-flexible.txt
+    if exist requirements-flexible.txt (
+        pip install -r requirements-flexible.txt
+    ) else (
+        echo Installing packages individually...
+        pip install "Django>=4.2.7,<5.0"
+        pip install "numpy>=1.26.0"
+        pip install "matplotlib>=3.7.0"
+        pip install "sympy>=1.12"
+        pip install "plotly>=5.17.0"
+        pip install "pandas>=2.1.0"
+    )
     if %errorlevel% neq 0 (
         echo Installation failed. Please check the README for manual installation steps.
         pause
