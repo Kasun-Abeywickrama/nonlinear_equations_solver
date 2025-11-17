@@ -85,6 +85,95 @@
             background: #cbd5e1;
             border-radius: 3px;
         }
+        
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+            pointer-events: none;
+        }
+        
+        .toast {
+            pointer-events: auto;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast.hide {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left: 4px solid #ef4444;
+            color: #b91c1c;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border-left: 4px solid #22c55e;
+            color: #166534;
+        }
+        
+        .toast-warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+            border-left: 4px solid #f59e0b;
+            color: #92400e;
+        }
+        
+        .toast-info {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left: 4px solid #3b82f6;
+            color: #1d4ed8;
+        }
+        
+        .toast-close {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .toast-close:hover {
+            opacity: 1;
+        }
+        
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 8px 8px;
+            animation: progress 5s linear forwards;
+        }
+        
+        @keyframes progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .toast-container {
+                left: 20px;
+                right: 20px;
+                top: 20px;
+                max-width: none;
+            }
+        }
     </style>
 </head>
 <body class="bbg-gray-50 min-h-screen flex flex-col">
@@ -115,6 +204,9 @@
         </div>
     </nav>
 
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+    
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow">
         {% block content %}
@@ -160,22 +252,127 @@
             document.getElementById(elementId).classList.remove('active');
         }
         
-        function showError(message, containerId = 'error-container') {
-            const container = document.getElementById(containerId);
-            if (container) {
-                container.innerHTML = `
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                        <strong class="font-bold">Error:</strong>
-                        <span class="block sm:inline"> ${message}</span>
+        // Toast Notification System
+        class ToastManager {
+            constructor() {
+                this.container = document.getElementById('toast-container');
+                this.toasts = new Map();
+                this.toastId = 0;
+            }
+            
+            show(message, type = 'error', duration = 5000, persistent = false) {
+                const id = ++this.toastId;
+                const toast = this.createToast(id, message, type, duration, persistent);
+                
+                this.container.appendChild(toast);
+                this.toasts.set(id, toast);
+                
+                // Trigger animation
+                setTimeout(() => toast.classList.add('show'), 10);
+                
+                // Auto-remove if not persistent
+                if (!persistent) {
+                    setTimeout(() => this.hide(id), duration);
+                }
+                
+                return id;
+            }
+            
+            createToast(id, message, type, duration, persistent) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type} p-4 max-w-sm w-full`;
+                toast.dataset.toastId = id;
+                
+                const iconMap = {
+                    error: '❌',
+                    success: '✅', 
+                    warning: '⚠️',
+                    info: 'ℹ️'
+                };
+                
+                const titleMap = {
+                    error: 'Error',
+                    success: 'Success',
+                    warning: 'Warning',
+                    info: 'Information'
+                };
+                
+                toast.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <span class="text-lg">${iconMap[type] || '⚠️'}</span>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <div class="font-bold text-sm">${titleMap[type] || 'Notification'}</div>
+                            <div class="text-sm mt-1">${message}</div>
+                        </div>
+                        <div class="ml-4 flex-shrink-0">
+                            <button class="toast-close text-lg" onclick="toastManager.hide(${id})">
+                                ×
+                            </button>
+                        </div>
                     </div>
+                    ${!persistent ? `<div class="toast-progress"></div>` : ''}
                 `;
+                
+                return toast;
+            }
+            
+            hide(id) {
+                const toast = this.toasts.get(id);
+                if (toast) {
+                    toast.classList.add('hide');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                        this.toasts.delete(id);
+                    }, 300);
+                }
+            }
+            
+            clear() {
+                this.toasts.forEach((toast, id) => this.hide(id));
             }
         }
         
-        function clearError(containerId = 'error-container') {
-            const container = document.getElementById(containerId);
-            if (container) {
-                container.innerHTML = '';
+        // Initialize toast manager
+        let toastManager;
+        document.addEventListener('DOMContentLoaded', () => {
+            toastManager = new ToastManager();
+        });
+        
+        // Legacy functions for backward compatibility
+        function showError(message, containerId = null) {
+            if (toastManager) {
+                toastManager.show(message, 'error', 8000);
+            } else {
+                // Fallback for immediate calls
+                setTimeout(() => showError(message), 100);
+            }
+        }
+        
+        function showSuccess(message) {
+            if (toastManager) {
+                toastManager.show(message, 'success', 4000);
+            }
+        }
+        
+        function showWarning(message) {
+            if (toastManager) {
+                toastManager.show(message, 'warning', 6000);
+            }
+        }
+        
+        function showInfo(message) {
+            if (toastManager) {
+                toastManager.show(message, 'info', 5000);
+            }
+        }
+        
+        function clearError(containerId = null) {
+            if (toastManager) {
+                toastManager.clear();
             }
         }
         
