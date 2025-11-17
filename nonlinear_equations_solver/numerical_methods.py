@@ -101,7 +101,7 @@ def bisection_method(func: Callable, a: float, b: float,
         NumericalMethodResult object containing results
     """
     
-    start_time = time.time()
+    start_time = time.perf_counter()
     iteration_history = []
     
     # Check if root is bracketed
@@ -117,12 +117,12 @@ def bisection_method(func: Callable, a: float, b: float,
     if abs(fa) < tolerance:
         return NumericalMethodResult(
             root=a, iterations=0, error=abs(fa), converged=True,
-            method_name="Bisection", execution_time=time.time() - start_time
+            method_name="Bisection", execution_time=time.perf_counter() - start_time
         )
     if abs(fb) < tolerance:
         return NumericalMethodResult(
             root=b, iterations=0, error=abs(fb), converged=True,
-            method_name="Bisection", execution_time=time.time() - start_time
+            method_name="Bisection", execution_time=time.perf_counter() - start_time
         )
     
     for i in range(max_iterations):
@@ -146,7 +146,7 @@ def bisection_method(func: Callable, a: float, b: float,
         
         # Check convergence
         if abs(fc) < tolerance or error < tolerance:
-            execution_time = time.time() - start_time
+            execution_time = time.perf_counter() - start_time
             return NumericalMethodResult(
                 root=c, iterations=i + 1, error=error, converged=True,
                 method_name="Bisection", execution_time=execution_time,
@@ -163,7 +163,7 @@ def bisection_method(func: Callable, a: float, b: float,
     
     # Max iterations reached
     c = (a + b) / 2
-    execution_time = time.time() - start_time
+    execution_time = time.perf_counter() - start_time
     return NumericalMethodResult(
         root=c, iterations=max_iterations, error=abs(b - a) / 2, converged=False,
         method_name="Bisection", execution_time=execution_time,
@@ -197,7 +197,7 @@ def newton_raphson_method(func: Callable, dfunc: Callable, x0: float,
         NumericalMethodResult object containing results
     """
     
-    start_time = time.time()
+    start_time = time.perf_counter()
     iteration_history = []
     
     x = x0
@@ -208,7 +208,7 @@ def newton_raphson_method(func: Callable, dfunc: Callable, x0: float,
         
         # Check if derivative is zero (method fails)
         if abs(dfx) < 1e-12:
-            execution_time = time.time() - start_time
+            execution_time = time.perf_counter() - start_time
             return NumericalMethodResult(
                 root=x, iterations=i, error=abs(fx), converged=False,
                 method_name="Newton-Raphson", execution_time=execution_time,
@@ -232,7 +232,7 @@ def newton_raphson_method(func: Callable, dfunc: Callable, x0: float,
         
         # Check convergence
         if error < tolerance or abs(fx) < tolerance:
-            execution_time = time.time() - start_time
+            execution_time = time.perf_counter() - start_time
             return NumericalMethodResult(
                 root=x_new, iterations=i + 1, error=error, converged=True,
                 method_name="Newton-Raphson", execution_time=execution_time,
@@ -242,7 +242,7 @@ def newton_raphson_method(func: Callable, dfunc: Callable, x0: float,
         x = x_new
     
     # Max iterations reached
-    execution_time = time.time() - start_time
+    execution_time = time.perf_counter() - start_time
     return NumericalMethodResult(
         root=x, iterations=max_iterations, error=abs(func(x)), converged=False,
         method_name="Newton-Raphson", execution_time=execution_time,
@@ -276,7 +276,7 @@ def secant_method(func: Callable, x0: float, x1: float,
         NumericalMethodResult object containing results
     """
     
-    start_time = time.time()
+    start_time = time.perf_counter()
     iteration_history = []
     
     fx0 = func(x0)
@@ -285,7 +285,7 @@ def secant_method(func: Callable, x0: float, x1: float,
     for i in range(max_iterations):
         # Check if function values are too close (method fails)
         if abs(fx1 - fx0) < 1e-12:
-            execution_time = time.time() - start_time
+            execution_time = time.perf_counter() - start_time
             return NumericalMethodResult(
                 root=x1, iterations=i, error=abs(fx1), converged=False,
                 method_name="Secant", execution_time=execution_time,
@@ -312,7 +312,7 @@ def secant_method(func: Callable, x0: float, x1: float,
         
         # Check convergence
         if error < tolerance or abs(fx2) < tolerance:
-            execution_time = time.time() - start_time
+            execution_time = time.perf_counter() - start_time
             return NumericalMethodResult(
                 root=x2, iterations=i + 1, error=error, converged=True,
                 method_name="Secant", execution_time=execution_time,
@@ -324,7 +324,7 @@ def secant_method(func: Callable, x0: float, x1: float,
         fx0, fx1 = fx1, fx2
     
     # Max iterations reached
-    execution_time = time.time() - start_time
+    execution_time = time.perf_counter() - start_time
     return NumericalMethodResult(
         root=x1, iterations=max_iterations, error=abs(fx1), converged=False,
         method_name="Secant", execution_time=execution_time,

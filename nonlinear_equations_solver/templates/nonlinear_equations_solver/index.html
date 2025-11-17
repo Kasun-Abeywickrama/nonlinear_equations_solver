@@ -334,7 +334,7 @@
                         {{ result.iterations }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {{ result.execution_time|floatformat:4 }}s
+                        {{ result.execution_time|floatformat:8 }}s
                     </td>
                 </tr>
                 {% endfor %}
@@ -520,7 +520,7 @@ function displayResults(data) {
             <div class="text-sm text-gray-500">Final Error</div>
         </div>
         <div class="result-card p-4 rounded-lg text-center">
-            <div class="text-2xl font-bold text-purple-600">${formatNumber(data.execution_time, 4)}s</div>
+            <div class="text-2xl font-bold text-purple-600">${formatNumber(data.execution_time, 8)}s</div>
             <div class="text-sm text-gray-500">Time</div>
         </div>
     `;
@@ -559,7 +559,7 @@ function displayComparisonResults(data) {
         html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatNumber(result.root)}</td>`;
         html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${result.iterations}</td>`;
         html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(result.error, 8)}</td>`;
-        html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(result.execution_time, 4)}</td>`;
+        html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(result.execution_time, 8)}</td>`;
         html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">`;
         html += `<span class="px-2 py-1 text-xs font-semibold rounded-full ${result.converged ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">`;
         html += `${result.converged ? 'Yes' : 'No'}</span></td>`;

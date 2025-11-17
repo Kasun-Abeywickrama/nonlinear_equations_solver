@@ -121,7 +121,7 @@
                                 {% if result.error %}{{ result.error|floatformat:8 }}{% else %}N/A{% endif %}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ result.execution_time|floatformat:4 }}s
+                                {{ result.execution_time|floatformat:8 }}s
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full 
@@ -195,7 +195,7 @@
                             <div class="space-y-1 text-sm">
                                 <div>Root: <span class="font-mono">{{ result.root|floatformat:6 }}</span></div>
                                 <div>Iterations: {{ result.iterations }}</div>
-                                <div>Time: {{ result.execution_time|floatformat:4 }}s</div>
+                                <div>Time: {{ result.execution_time|floatformat:8 }}s</div>
                                 <div>
                                     Status: 
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full 

@@ -195,11 +195,11 @@
                     class="px-3 py-1 text-xs bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 transition-colors">
                 Test Warning
             </button>
-            <button onclick="showInfo('Here\\'s some helpful information for you!')" 
+            <button onclick="showInfo('Here is some helpful information for you!')" 
                     class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
                 Test Info
             </button>
-            <button onclick="toastManager.clear()" 
+            <button onclick="toastManager.clear();" 
                     class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors">
                 Clear All
             </button>
@@ -314,8 +314,8 @@ function displayResults(result) {
                 <div class="text-sm text-purple-800">Final Error</div>
             </div>
             <div class="bg-orange-50 p-4 rounded-lg text-center">
-                <div class="text-2xl font-bold text-orange-600">${formatNumber(result.execution_time, 4)}</div>
-                <div class="text-sm text-orange-800">Time (seconds)</div>
+                <div class="text-2xl font-bold text-orange-600">${formatNumber(result.execution_time, 8)}s</div>
+                <div class="text-sm text-orange-800">Time</div>
             </div>
         </div>
         
